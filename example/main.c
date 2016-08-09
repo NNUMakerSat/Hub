@@ -15,6 +15,5 @@ int main(void) {
         do i--;
         while(i != 0);
     }
-
     return 0;
 }

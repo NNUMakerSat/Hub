@@ -108,19 +108,18 @@ Thumbs.db
 
 *.file
 
-*MSP430 \Debug
-*MSP430 \Release
 *.xdchelp
 *\.config
 *\.launches
 *.map
-example/Debug/Blinky_Example.out
+
 *.xml
-example/targetConfigs/MSP430FR6989.ccxml
+
 *.txt
-example/Debug/subdir_vars.mk
+
 *.mk
 example/Debug/makefile
 *.opt
 example/Debug/main.obj
 *.d
+*.out
