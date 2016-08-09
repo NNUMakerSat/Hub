@@ -90,17 +90,26 @@ Thumbs.db
 ###################
 # Custom List
 ###################
-.mk
-.xml
-.out
-.map
-.obj
-.d
-.opt
+#.mk
+#.xml
+#.out
+#.map
+#.obj
+#.d
+#.opt
 
-.launch
+#.launch
 
-.ccxml
-.xdchelp
+#.ccxml
+#.xdchelp
 
-.cmd
+#.cmd
+*.makefile
+
+*.file
+
+*MSP430 \Debug
+*MSP430 \Release
+*.xdchelp
+*\.config
+*\.launches
