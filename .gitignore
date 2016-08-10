@@ -123,3 +123,4 @@ example/Debug/makefile
 example/Debug/main.obj
 *.d
 *.out
+*.ccxml
