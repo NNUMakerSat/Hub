@@ -75,25 +75,15 @@ WDTCTL = WDTPW + WDTHOLD; 					// Stop WDT
 PM5CTL0 &amp;= ~LOCKLPM5;
 
 ////////////////////Set clock speed///////////////////////////
-CSCTL0_H = CSKEY &gt;&gt; 8; 				// Unlock CS
+CSCTL0_H = CSKEY &gt;&gt; 8; 				// Unlock CS registers
 
-registers
+CSCTL1 = DCOFSEL_6; // Set DCO to 8MHz
 
-CSCTL1 = DCOFSEL_6; // Set DCO to
+CSCTL2 = SELA__VLOCLK | SELS__DCOCLK | SELM__DCOCLK; // Set SMCLK = MCLK = DCO = ACLK = VLOCLK
 
-8MHz
+CSCTL3 = DIVA__1 | DIVS__1 | DIVM__1; // Set all dividers to 1
 
-CSCTL2 = SELA__VLOCLK | SELS__DCOCLK | SELM__DCOCLK; // Set SMCLK = MCLK
-
-= DCO = ACLK = VLOCLK
-
-CSCTL3 = DIVA__1 | DIVS__1 | DIVM__1; // Set all
-
-dividers to 1
-
-CSCTL0_H = 0; // Lock CS
-
-registers
+CSCTL0_H = 0; // Lock CSregisters
 
 ////////////////////Set clock speed///////////////////////////
 
