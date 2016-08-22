@@ -24,4 +24,16 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>Initialize.c</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PARENT_LOC/Common_Library/UART_Polling/Initialize.c</locationURI>
+		</link>
+		<link>
+			<name>Initialize.h</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PARENT_LOC/Common_Library/UART_Polling/Initialize.h</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
