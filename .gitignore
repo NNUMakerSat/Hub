@@ -125,3 +125,5 @@ example/Debug/main.obj
 *.out
 Hub to Radio/Debug/makefile
 Hub_Functionality_Testing/Debug/makefile
+*.obj
+*.obj

@@ -28,12 +28,12 @@
 		<link>
 			<name>Initialize.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PARENT_LOC/Common_Library/UART_Polling/Initialize.c</locationURI>
+			<locationURI>PARENT-2-PARENT_LOC/Common_Library/Initialize/Initialize.c</locationURI>
 		</link>
 		<link>
 			<name>Initialize.h</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PARENT_LOC/Common_Library/UART_Polling/Initialize.h</locationURI>
+			<locationURI>PARENT-2-PARENT_LOC/Common_Library/Initialize/Initialize.h</locationURI>
 		</link>
 		<link>
 			<name>LED.c</name>
