@@ -25,15 +25,17 @@ int main(void) {
 	initialize_Ports();
 	initialize_Clocks();
 	init_LED();
-	init_UART(0, 0);						// Initalize UART at Baud = 9600 with P2.0 - TX, P2.1 - RX, P1.4 - Radio Busy line
+	init_UART(1, 0);						// Initalize UART at Baud = 38400 with P2.0 - TX, P2.1 - RX, P1.4 - Radio Busy line
 
+	LED_1_On();
 	for (i = 0; i < 39; ++i) {				// Writes test_Array to radio
 		write_UART(test_Array[i]);
-		flash_LED_1(10, 1);					// Flash LED 1 at 500 Hz (default) once for every byte through TX
-
+//		flash_LED_1(10, 1);					// Flash LED 1 at 500 Hz (default) once for every byte through TX
+	}
+	LED_2_On();
 	for (j = 0; j < 39; ++j) {				// Writes test_Array to radio
 		read_UART();
-		flash_LED_2(0, 1);					// Flash LED 2 at 10Hz once
+//		flash_LED_2(0, 1);					// Flash LED 2 at 10Hz once
 		collect_Array[j] = RX_Data;			// 0 - 10Hz, 1 - Hz
 	}
 /*
