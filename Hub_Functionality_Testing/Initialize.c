@@ -22,7 +22,7 @@ void initialize_Clocks(void) {								// Sets all clocks to standard position
 
 	CSCTL0_H = CSKEY >> 8;                    // Unlock CS registers (allows for change in clock)
 	CSCTL1 = DCOFSEL_6;                       // Set DCO to 8MHz (option to go to 16 MHz but FRAM doesn't like above 8MHz)
-	CSCTL2 = SELA__LFXTCLK | SELS__HFXTCLK | SELM__DCOCLK;
+	CSCTL2 = SELA__LFXTCLK | SELS__DCOCLK | SELM__DCOCLK;
 	CSCTL3 = DIVA__1 | DIVS__1 | DIVM__1;     // Set all dividers to 1 (all CLKS at highest frequency)
 	CSCTL4 |= LFXTDRIVE_3 | HFXTDRIVE_3;
 	CSCTL4 &= ~(LFXTOFF | HFXTOFF);

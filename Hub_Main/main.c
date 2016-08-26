@@ -90,5 +90,5 @@ int main(void) {
     }
 
     ///////////////////////// FIN ///////////////////////////////
-    return 0;										// Return value that represents that Hub is ready to be turned off
+    return 1;										// Return value that represents that Hub is ready to be turned off
 }

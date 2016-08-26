@@ -14,6 +14,7 @@
 int main(void) {
 	uint8_t i;				// counter for loop
 	uint8_t j = 0;
+	uint8_t k = 0;
 	uint8_t RX_Data;
 	uint8_t collect_Array[39];
 	uint8_t test_Array[39] = {0x50, 0x50, 0x50, 0x0C, 'D', 'e', 'a', 'r', ' ', 'E', 'L', 'a', 'N', 'a', ' ', 'X', 'I', 'V', ',',
@@ -28,6 +29,11 @@ int main(void) {
 	init_UART(1, 0);						// Initalize UART at Baud = 38400 with P2.0 - TX, P2.1 - RX, P1.4 - Radio Busy line
 
 	LED_1_On();
+
+/*	for (k = 0; k < 39; ++k) {
+		test_Array[k] = ~test_Array[k];
+	} */
+
 	for (i = 0; i < 39; ++i) {				// Writes test_Array to radio
 		write_UART(test_Array[i]);
 //		flash_LED_1(10, 1);					// Flash LED 1 at 500 Hz (default) once for every byte through TX

@@ -50,14 +50,9 @@ void init_UART (bool baud_Rate, bool pin_Setting) {
 		break;
 }
 
-	 // XT1 Setup
-	CSCTL0_H = CSKEY >> 8;                		// Unlock CS registers
-	CSCTL1 = DCOFSEL_0;							// Set DCO to 1MHz
-	CSCTL2 = SELA__LFXTCLK | SELS__DCOCLK | SELM__DCOCLK;
-	CSCTL0_H = 0;                             	// Lock CS registers
-
 	// Configure USCI_A0 for SPI operation
-	UCA0CTL1 |= UCSWRST;                      		// **Put state machine in reset**
+	UCA0CTLW0 |= UCSWRST;        			// **Put state machine in reset**
+	UCA0CTLW0 |= UCSSEL__SMCLK ;          	// Set SMCLK = 8000000 as UCBRCLK//	UCA0CTLW0 |= UCMSB;								// MSB first
 
 	switch (baud_Rate) {
 	case 0:
@@ -70,25 +65,14 @@ void init_UART (bool baud_Rate, bool pin_Setting) {
 	 	break;
 
 	case 1:
-				// Configure Timer for 38400 Baud
-		UCA0CTL1 = UCSSEL__SMCLK;                 	// Set SMCLK = 1000000 as UCBRCLK
-		UCA0BR0 = 0x1A;								// 9600 baud
-		UCA0MCTLW |= 0x0100;                 // 1000000/38400 - INT(1000000/38400)=0.04
-		                                          	// UCBRSx value = 0x01 (See UG)
-											// N = 0.0529, effectively 38,383.4 Baud
-		UCA0BR1 = 0;
-	 	break;
-
 	default:
-					// Configure Timer for 9600 Baud
-		UCA0CTL1 = UCSSEL__ACLK;                  // Set ACLK = 32768 as UCBRCLK
-		UCA0BR0 = 3;                              // 9600 baud
-		UCA0MCTLW |= 0x5300;                      // 32768/9600 - INT(32768/9600)=0.41
-		                                          // UCBRSx value = 0x53 (See UG)
-		UCA0BR1 = 0;
-		break;
+		// Configure Timer for 38400 Baud
+
+		UCA0BRW = 0x000D;							// prescaler/divider = 1 , BRCLK = 8 MHz
+		UCA0MCTLW |= 0x8401;                		// 38400 baud from 8 MHz clk, see table
 	}
-	UCA0CTL1 &= ~UCSWRST;                    	 // release from reset                   	 	// **Initialize USCI state machine**
+
+	UCA0CTLW0 &= ~UCSWRST;                    		 // release from reset                   	 	// **Initialize USCI state machine**
 }
 
 ////////////////////// UART WRITE POLLING /////////////////////////////////////
@@ -101,6 +85,7 @@ void write_UART (uint8_t TX_Data) {
 ////////////////////// UART READ POLLING //////////////////////////////////
 uint8_t read_UART (void) {
 	while (!(UCA0IFG & UCRXIFG)) {};    			// While RX flag is high
+//	while (!(UCA0IFG & UCA0RXBUF)) {};    			// While RX flag is high
 	RX_Data = UCA0RXBUF;							// Recieve Radio ACK
 	return RX_Data;
 }
