@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include "init.h"
 #include "LED.h"
-#include "poop.h"
 //#include "radio_chk.h"
 #include "Comm.h"
 
