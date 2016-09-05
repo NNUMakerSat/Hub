@@ -8,8 +8,10 @@
 #ifndef PACKETIZER_H_
 #define PACKETIZER_H_
 
-void init_Circular_Buffer(void);
+void init_Buffers(void);
 
+void Packetizer(uint16_t source_ID);
 
+void write_To_Packetizer(uint8_t packet_Data, uint8_t SB_Select);
 
 #endif /* PACKETIZER_H_ */

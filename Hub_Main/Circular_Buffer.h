@@ -14,11 +14,8 @@
 
 void init_Buffer(void);
 void write_Buffer(uint8_t data);
-void write_Buffer_Element(uint8_t data, uint8_t ele_Num);
 uint8_t read_Buffer(void);
-uint8_t read_Buffer_Element(uint8_t ele_Num);
 bool is_Buffer_Full(void);
 bool is_Buffer_Empty(void);
-uint8_t bytes_In_Buffer(void);
 
 #endif /* CIRCULAR_BUFFER_H_ */

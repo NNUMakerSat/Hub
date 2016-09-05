@@ -41,10 +41,6 @@ void write_Buffer(uint8_t data) {
     }
 }
 
-void write_Buffer_Element(uint8_t data, uint8_t ele_Num) {
-    g_buffer[ele_Num] = data;
-}
-
 uint8_t read_Buffer(void) {
     uint8_t readVal = g_buffer[g_top];
     g_top++;
@@ -56,11 +52,6 @@ uint8_t read_Buffer(void) {
     } else {
         g_bufferEmpty = false;
     }
-    return readVal;
-}
-
-uint8_t read_Buffer_Element(uint8_t ele_Num) {
-    uint8_t readVal = g_buffer[ele_Num];
     return readVal;
 }
 

@@ -1,13 +1,26 @@
 #include <msp430.h> 
+#include "Circular_Buffer.h"
+#include "Packetizer.h"
 
-/*
- * main.c
- */
+// main.c
 int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;
 
-    init_Circular_Buffer();
-	
+    uint16_t source_ID = 0b10;
+
+//////////////////////////////////////////////////////////////////////////
+//					 init Hub/SPI section								//
+//////////////////////////////////////////////////////////////////////////
+//	init_Hub();
+//	init_Buffer();
+//	uint8_t whatison EPS(Hub&RAD);
+
+	Packetizer(source_ID);
+
+//////////////////////////////////////////////////////////////////////////
+//					 write to Radio section								//
+//////////////////////////////////////////////////////////////////////////
+
 	return 0;
 }
