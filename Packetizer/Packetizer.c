@@ -10,7 +10,7 @@
 
 uint16_t g_POLY_Exp_Count = 0;
 uint16_t g_RAD_Exp_Count = 0;
-uint16_t g_IMU_Exp_Count = 0x1233;
+uint16_t g_IMU_Exp_Count = 0x3FFF;
 uint16_t source_ID_Exp_Count = 0x0000;
 
 
@@ -20,13 +20,13 @@ uint8_t Control_Bytes[6] = {0x50, 0x50, 0x50, 0x50, 0, 0};
 
 void Packetizer(uint16_t source_ID) {
 	switch (source_ID) {
-	case 0:								// IMU
-		source_ID <<= 14;		// shift ID 14 bits to the left & fill the 14 bits with 1's
+	case 0:													// IMU
+		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
 		source_ID &= 0x3FFFF;
 
 		source_ID_Exp_Count = source_ID | g_IMU_Exp_Count;	// give source_ID_Exp_Count appropriate value
 
-		if (g_IMU_Exp_Count >= 0xCFFF) {					// increment counter
+		if (g_IMU_Exp_Count >= 0x3FFF) {					// increment counter
 			g_IMU_Exp_Count = 0x0000;
 		} else {
 			++g_IMU_Exp_Count;
@@ -36,13 +36,13 @@ void Packetizer(uint16_t source_ID) {
 		Control_Bytes[5] = source_ID_Exp_Count;
 		break;
 
-	case 1:								// RAD
-		source_ID <<= 14;		// shift ID 14 bits to the left & fill the 14 bits with 1's
+	case 1:													// RAD
+		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
 		source_ID &= 0x3FFFF;
 
 		source_ID_Exp_Count = source_ID | g_RAD_Exp_Count;	// give source_ID_Exp_Count appropriate value
 
-		if (g_RAD_Exp_Count >= 0xCFFF) {					// increment counter
+		if (g_RAD_Exp_Count >= 0x3FFF) {					// increment counter
 			g_RAD_Exp_Count = 0x0000;
 		} else {
 			++g_RAD_Exp_Count;
@@ -52,13 +52,13 @@ void Packetizer(uint16_t source_ID) {
 		Control_Bytes[5] = source_ID_Exp_Count;
 		break;
 
-	case 2:								// POLY
-		source_ID <<= 14;		// shift ID 14 bits to the left & fill the 14 bits with 1's
+	case 2:													// POLY
+		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
 		source_ID &= 0x3FFFF;
 
 		source_ID_Exp_Count = source_ID | g_IMU_Exp_Count;	// give source_ID_Exp_Count appropriate value
 
-		if (g_IMU_Exp_Count >= 0xCFFF) {					// increment counter
+		if (g_IMU_Exp_Count >= 0x3FFF) {					// increment counter
 			g_IMU_Exp_Count = 0x0000;
 		} else {
 			++g_IMU_Exp_Count;

@@ -7,7 +7,7 @@ int main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
     PM5CTL0 &= ~LOCKLPM5;
 
-    uint16_t source_ID = 0b10;
+    uint16_t source_ID = 0x0001;
 
 //////////////////////////////////////////////////////////////////////////
 //					 init Hub/SPI section								//
@@ -15,9 +15,9 @@ int main(void) {
 //	init_Hub();
 //	init_Buffer();
 //	uint8_t whatison EPS(Hub&RAD);
-
+while (1) {
 	Packetizer(source_ID);
-
+}
 //////////////////////////////////////////////////////////////////////////
 //					 write to Radio section								//
 //////////////////////////////////////////////////////////////////////////
