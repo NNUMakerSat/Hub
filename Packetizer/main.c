@@ -8,16 +8,31 @@ int main(void) {
     PM5CTL0 &= ~LOCKLPM5;
 
     uint16_t source_ID = 0x0001;
+    uint8_t i = 0;
+    uint8_t exp_Counter = 4;
+
+    uint8_t PolyExample[30] = {0x22, 0x33, 0x44, 0x55, '$', 'T', '0', 'p', 0x22, 0x33, '$', 'T', '0', 'p',
+    		0x55, 0x22, 0x33, 0x44, 0x55, '$', 'T', '0', 'p', 0x11, 0xFF, 0x34 '$', 'T', '0', 'p'};
+
+    uint8_t PolyIMU[11] = {0x22, 0x33, 0x44, 0x55, 0x22, 0x33, 0x55, 0x22, 0x33, 0x44, 0x68};
+
+    uint8_t PolyRAD[4] = {0x22, 0x33, 0x44, 0x55};
+
 
 //////////////////////////////////////////////////////////////////////////
 //					 init Hub/SPI section								//
 //////////////////////////////////////////////////////////////////////////
 //	init_Hub();
 //	init_Buffer();
-//	uint8_t whatison EPS(Hub&RAD);
-while (1) {
-	Packetizer(source_ID);
-}
+//	uint8_t source_ID (returned) EPS(Hub&RAD);
+
+    while (P4OUT |= BIT1) { 			// while SB is transmitting information
+    	write_Buffer(SPI_read());
+    	++exp_Counter;					// Counts times SPI read was used
+    }
+
+    Packetizer(source_ID, exp_Counter);
+
 //////////////////////////////////////////////////////////////////////////
 //					 write to Radio section								//
 //////////////////////////////////////////////////////////////////////////

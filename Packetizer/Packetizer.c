@@ -13,12 +13,15 @@ uint16_t g_RAD_Exp_Count = 0;
 uint16_t g_IMU_Exp_Count = 0x3FFF;
 uint16_t source_ID_Exp_Count = 0x0000;
 
-
+uint8_t i;
 
 uint8_t Control_Bytes[6] = {0x50, 0x50, 0x50, 0x50, 0, 0};
+uint8_t Poly_Bytes[100];
+uint8_t IMU_Bytes[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t RAD_Bytes[4] = {0, 0, 0, 0};
 
 
-void Packetizer(uint16_t source_ID) {
+void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 	switch (source_ID) {
 	case 0:													// IMU
 		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
@@ -50,6 +53,11 @@ void Packetizer(uint16_t source_ID) {
 
 		Control_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
 		Control_Bytes[5] = source_ID_Exp_Count;
+
+		for (i = 0; i < 4; ++i) {
+			RAD_Bytes[i] = read_Buffer();
+		}
+
 		break;
 
 	case 2:													// POLY
@@ -71,6 +79,9 @@ void Packetizer(uint16_t source_ID) {
 	default:												// ERROR, so packet
 		break;
 	}
+
+
+
 }
 
 
