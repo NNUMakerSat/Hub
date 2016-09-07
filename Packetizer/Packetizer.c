@@ -13,14 +13,32 @@ uint16_t g_RAD_Exp_Count = 0;
 uint16_t g_IMU_Exp_Count = 0x3FFF;
 uint16_t source_ID_Exp_Count = 0x0000;
 
+uint32_t p_RAD;
+uint32_t p_IMU;
+uint32_t p_POLY;
+
 uint8_t i;
 
-uint8_t Control_Bytes[6] = {0x50, 0x50, 0x50, 0x50, 0, 0};
 uint8_t Poly_Bytes[100];
-uint8_t IMU_Bytes[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-uint8_t RAD_Bytes[4] = {0, 0, 0, 0};
+uint8_t IMU_Bytes[17] = {0x50, 0x50, 0x50, 0x0C, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t RAD_Bytes[10] = {0x50, 0x50, 0x50, 0x0C, 0, 0, 0, 0, 0, 0};
 
-
+/* Aaron's Notes: SPI read all data initually into the circular buffer
+ * read the size with a counter and then read in that number of bytes
+ * from the buffer (ie if 4 is put in, read four out. They should all be
+ * in correct order. Now what will happen is you will make a couple of arrays
+ * that will output the entire packet to the proper area (multiple arrays
+ * because don't wanan do stop bytes much). This means that
+ * you will have all the control bytes, the experment and source ID numbers,
+ * and the data with a pointer to the start of it being passed out of the
+ * function.
+ * The issue is with the polymer board. I will have to check and delete stop
+ * bytes ($T0p) and then put it into arrays. It might be multiple packets long
+ * with multiple (nononon single) points (struct? or multiple calls? nonono
+ * just one array.) UART will then have to be able to stop reading after 35 bytes
+ * and keep going after that until every bit is sent. YAy!
+ */
+/*
 void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 	switch (source_ID) {
 	case 0:													// IMU
@@ -34,10 +52,16 @@ void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 		} else {
 			++g_IMU_Exp_Count;
 		}
+		IMU_Bytes[0] = IMU_Bytes[1] = IMU_Bytes[2] = 0x50;
+		IMU_Bytes[3] = 0x0C;
+		IMU_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
+		IMU_Bytes[5] = source_ID_Exp_Count;
 
-		Control_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
-		Control_Bytes[5] = source_ID_Exp_Count;
-		break;
+		for (i = 6; i < (4+6); ++i) {
+			RAD_Bytes[i] = read_Buffer();
+		}
+
+		return pointer;
 
 	case 1:													// RAD
 		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
@@ -51,14 +75,16 @@ void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 			++g_RAD_Exp_Count;
 		}
 
-		Control_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
-		Control_Bytes[5] = source_ID_Exp_Count;
+		RAD_Bytes[0] = RAD_Bytes[1] = RAD_Bytes[2] = 0x50;
+		RAD_Bytes[3] = 0x0C;
+		RAD_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
+		RAD_Bytes[5] = source_ID_Exp_Count;
 
-		for (i = 0; i < 4; ++i) {
+		for (i = 6; i < (4+6); ++i) {
 			RAD_Bytes[i] = read_Buffer();
 		}
 
-		break;
+		return static pointer;
 
 	case 2:													// POLY
 		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
@@ -74,9 +100,10 @@ void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 
 		Control_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
 		Control_Bytes[5] = source_ID_Exp_Count;
-		break;
 
-	default:												// ERROR, so packet
+		return pointer;
+
+	default:												// ERROR, so no packet
 		break;
 	}
 
