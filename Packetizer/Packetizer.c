@@ -15,9 +15,15 @@ uint16_t source_ID_Exp_Count = 0x0000;
 
 uint8_t i;
 
-uint8_t POLY_Bytes[100] = {0x50, 0x50, 0x50, 0x0C, 0x12, 0x69, 0xCF, 0xFF};
+uint8_t POLY_Bytes[100] = {0x50, 0x50, 0x50, 0x0C};
 uint8_t IMU_Bytes[17] = {0x50, 0x50, 0x50, 0x0C, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint8_t RAD_Bytes[10] = {0x50, 0x50, 0x50, 0x0C, 0, 0, 0, 0, 0, 0};
+
+
+
+
+
+
 
 // Pass pointer to start of all arrays
 // work out getting rid of $T0p bytes
@@ -31,7 +37,7 @@ uint8_t RAD_Bytes[10] = {0x50, 0x50, 0x50, 0x0C, 0, 0, 0, 0, 0, 0};
  * because don't wanan do stop bytes much). >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> done
  * This means that you will have all the control bytes (nope),
  * the experment and source ID numbers, and the data with a pointer to
- * the start of it being passed out of the function. >>>>>>>>>>>>>>>>>>>>>>>>>>>>> done
+ * the start of it being passed out of the function. >>>>>>>>>>>>>>>>>>>>>doententent
  * The issue is with the polymer board. I will have to check and delete stop
  * bytes ($T0p) and then put it into arrays. It might be multiple packets long
  * with multiple (nononon single) points (struct? or multiple calls? nonono
@@ -46,7 +52,7 @@ uint8_t *Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 
 	switch (source_ID) {
 	case 0:													// IMU
-		*p_IMU = &IMU_Bytes[0];					// stores 1st element of array address in pointer (don't move out of switch!)
+		*p_IMU = &IMU_Bytes[0];					// stores 1st element of array address in pointer (don't move out of swi!ch!)
 		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
 		source_ID &= 0x3FFFF;
 
@@ -69,7 +75,7 @@ uint8_t *Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 		return p_IMU;
 
 	case 1:													// RAD
-		*p_RAD = &RAD_Bytes[0];					// stores 1st element of array address in pointer (don't move out of switch!)
+		*p_RAD = &RAD_Bytes[0];					// stores 1st element of array address in poin (don't move out of switch!)h!)
 		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
 		source_ID &= 0x3FFFF;
 
@@ -93,7 +99,7 @@ uint8_t *Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 		return p_RAD;
 
 	case 2:													// POLY
-		*p_POLY = &POLY_Bytes[0];				// stores 1st element of array address in pointer (don't move out of switch!)
+		*p_POLY = &POLY_Bytes[0];				// stores 1st element of array address in point(don't move out of switch!)h!)
 		source_ID <<= 14;						// shift ID 14 bits to the left & fill the 14 bits with 1's
 		source_ID &= 0x3FFFF;
 

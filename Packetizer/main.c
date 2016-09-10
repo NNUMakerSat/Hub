@@ -1,4 +1,4 @@
-#include <msp430.h> 
+#include <msp430.h>
 #include <stdint.h>
 #include "Circular_Buffer.h"
 #include "Packetizer.h"
@@ -15,7 +15,7 @@ int main(void) {
 
     uint8_t array[20];
 
-    uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0x00, 0x70};  //150 bytes expected?
+    uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0x00, 0x70};  //150 bytes expected? //memcpy.c??
 
 //    uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0, 0x70, 0x22, 0x33, 0x24, 0x54, 0, 0x70, 0x55, 0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0, 0x70, 0x11, 0xFF, 0x34 0x24, 0x54, 0, 0x70};
 
@@ -45,25 +45,56 @@ int main(void) {
     	++exp_Counter;					// Counts times SPI read was used
     } */
 
+ /*   Packetizer(source_ID, exp_Counter);
+
+      for (i = 0; i < 20; ++i) {
+      	switch (source_ID) {
+      	case 0:							// IMU
+    //  		write_UART(*p_IMU);
+     // 		array[i] = *p_IMU++;
+      	case 1:							// RAD
+    //  		write_UART(*p_RAD);
+      		array[i] = *p_RAD++;		// works great
+
+
+
+
+      	case 2:							// POLY
+     // 		write_UART(*p_POLY);
+      		++p_POLY;
+      	}
+      } */
+/////////////////////////////////////////////////////////////////////////////// EXPERMENTATION CODE
     Packetizer(source_ID, exp_Counter);
 
-    for (i = 0; i < 10; ++i) {
+    for (i = 0; i < 20; ++i) {
     	switch (source_ID) {
     	case 0:							// IMU
   //  		write_UART(*p_IMU);
-    		array[i] = *p_IMU++;
+  //  		array[i] = *p_IMU++;
+    		++j;
+    		break;
     	case 1:							// RAD
-  //  		write_UART(*p_RAD);
-    		array[i] = *p_RAD++;		// works great
+    //		write_UART(*p_RAD);
+    		array[i] = *p_RAD++;		// works with EXTREME caution
+    		break;						// alternates FFh and 3Fh when
 
 
 
 
     	case 2:							// POLY
    // 		write_UART(*p_POLY);
-    		array[i] = *p_POLY++;
+    //		array[i] = *p_POLY++;
+    	//
+    	//	break;
+
+
+
     	}
     }
+      //////////////////////////////////////////////////////////////////////////////////////
+	while (1) {}
+}
 
 //////////////////////////////////////////////////////////////////////////
 //					 write to Radio section								//
@@ -90,9 +121,9 @@ int main(void) {
 
     /* address stored in pointer variable */
 
-    /* access the value using the pointer */
+    /* access the value using the pointer
 
-	return 0;
+	while (1) {}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,7 +153,7 @@ int main(void) {
 
     uint8_t example_IMU[11] = {0x22, 0x33, 0x44, 0x55, 0x22, 0x33, 0x55, 0x22, 0x33, 0x44, 0x68};
 
-    uint8_t example_RAD[4] = {0x22, 0x39, 0x44, 0x55};
+    uint8_t example_RAD[4] = {0x22, 0x33, 0x44, 0x55};
 
     uint8_t *p_RAD;
     uint8_t *p_IMU;        					// pointers for Science Board Arrays
@@ -191,8 +222,8 @@ int main(void) {
 
     /* address stored in pointer variable */
 
-    /* access the value using the pointer *
+    /* access the value using the pointer */
 
-	return 0;
-}
-*/
+//	return 0;
+//}
+
