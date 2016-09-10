@@ -73,7 +73,7 @@ int main(void) {
   //  		write_UART(*p_IMU);
   //  		array[i] = *p_IMU++;
     		++j;
-    		break;
+   // 		break;						// 32h D0h F0h 00h FFh 3Fh FFh 3Fh FFh 3Fh ...... (even on other board)
     	case 1:							// RAD
     //		write_UART(*p_RAD);
     		array[i] = *p_RAD++;		// works with EXTREME caution
