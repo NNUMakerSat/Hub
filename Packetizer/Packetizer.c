@@ -10,7 +10,7 @@
 
 uint16_t g_POLY_Exp_Count = 0;
 uint16_t g_RAD_Exp_Count = 0;
-uint16_t g_IMU_Exp_Count = 0;
+uint16_t g_IMU_Exp_Count = 110;
 uint16_t g_source_ID_Exp_Count = 0x0000;
 
 uint8_t POLY_Bytes[39] = { 0x50, 0x50, 0x50, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -29,11 +29,11 @@ uint8_t RAD_Bytes[39] = { 0x50, 0x50, 0x50, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00,
 void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 
 	switch (source_ID) {
-	case 0:
+	case 1:
 		// IMU
 		source_ID <<= 14; // shift ID 14 bits to the left & fill the 14 bits with 1's
 
-		source_ID_Exp_Count = source_ID | g_IMU_Exp_Count; // give source_ID_Exp_Count appropriate value
+		g_source_ID_Exp_Count = source_ID | g_IMU_Exp_Count; // give source_ID_Exp_Count appropriate value
 
 		if (g_IMU_Exp_Count >= 0x3FFF) {					// increment counter
 			g_IMU_Exp_Count = 0x0000;
@@ -41,12 +41,12 @@ void Packetizer(uint16_t source_ID, uint8_t bytes_Read) {
 			++g_IMU_Exp_Count;
 		}
 
-		IMU_Bytes[4] = source_ID_Exp_Count >> 8;		// put values into array
-		IMU_Bytes[5] = source_ID_Exp_Count;
+		IMU_Bytes[4] = g_source_ID_Exp_Count >> 8;		// put values into array
+		IMU_Bytes[5] = g_source_ID_Exp_Count;
 
 		// put data in packetized buffer
 		uint8_t ii = 6;
-		while (!is_Buffer_Empty()) {
+		while (!is_Buffer_Empty()) {					// thinks it is empty after element 9 (0x55) (it is not because 0x00)
 			IMU_Bytes[ii] = read_Buffer();
 			ii++;
 		}
