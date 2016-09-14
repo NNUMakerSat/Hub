@@ -28,7 +28,7 @@ void init_Buffer(void){
     g_bufferEmpty = false;
 }
 
-void write_Buffer(uint8_t data) {		// return g_top
+void write_Buffer(uint8_t data) {
     g_buffer[g_bottom] = data;
     g_bottom++;
     if(g_bottom > g_end) {
@@ -39,7 +39,6 @@ void write_Buffer(uint8_t data) {		// return g_top
     } else {
         g_bufferFull = false;
     }
-//    return g_top;
 }
 
 void write_Buffer_Element(uint8_t data, uint8_t ele_Num) {
@@ -69,7 +68,6 @@ bool is_Buffer_Full(void) {
     return g_bufferFull;
 }
 
-bool is_Buffer_Empty(void) {		// return g_bottom
+bool is_Buffer_Empty(void) {
     return g_bufferEmpty;
-//	return g_bottom;
 }
