@@ -1,12 +1,15 @@
 /*
- * Comm.h
+ * Comm.c
  *
- *  Created on: Aug 18, 2016
- *      Author: MKamstra
+ *  Created on: Sep 16, 2016
+ *      Author: mkamstra
  */
+#include <msp430.h>
 #include <stdint.h>
-#ifndef COMM_H_
-#define COMM_H_
+#include "Comm.h"
+
+
+
 
 uint8_t sci_1_powerUp[39] = { 0x50, 0x50, 0x50, 0x0B,   // Science board 1 ON						  0x01, 0xFF, 0x02, 0x00,
 						  0x01, 0xFF, 0x02, 0x00,
@@ -51,5 +54,3 @@ uint8_t sci_4_powerUp[39] = { 0x50, 0x50, 0x50, 0x0B,   // Science board 4 ON			
 						  0x00, 0x00, 0x00, 0x00,
 						  0x00, 0x00, 0x00, 0x00,
 						  0x00, 0x00, 0x00 };
-
-#endif /* COMM_H_ */

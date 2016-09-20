@@ -10,15 +10,7 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./Circular_Buffer.obj" \
-"./Initialize.obj" \
-"./LED.obj" \
-"./Packetizer.obj" \
-"./SPI_Polling.obj" \
-"./UART_Polling.obj" \
-"./init.obj" \
 "./main.obj" \
-"./radio_chk.obj" \
 "../lnk_msp430fr6989.cmd" \
 $(GEN_CMDS__FLAG) \
 -llibmath.a \
@@ -129,40 +121,40 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-MakerSat0_r0.out \
+Hub_Main.out \
 
 EXE_OUTPUTS__QUOTED += \
-"MakerSat0_r0.out" \
+"Hub_Main.out" \
 
 BIN_OUTPUTS += \
-MakerSat0_r0.hex \
+Hub_Main.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"MakerSat0_r0.hex" \
+"Hub_Main.hex" \
 
 
 # All Target
-all: MakerSat0_r0.out
+all: Hub_Main.out
 
 # Tool invocations
-MakerSat0_r0.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+Hub_Main.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MSP430 Linker'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/bin/cl430" -vmspx --data_model=restricted --use_hw_mpy=F5 --advice:power=all --advice:hw_config=all -g --define=__MSP430FR6989__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"MakerSat0_r0.map" --heap_size=160 --stack_size=160 --cinit_hold_wdt=on -i"C:/ti/ccsv6/ccs_base/msp430/include" -i"C:/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" -i"C:/ti/ccsv6/ccs_base/msp430/lib/FR59xx" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/include" --reread_libs --priority --display_error_number --warn_sections --diag_wrap=off --xml_link_info="MakerSat0_r0_linkInfo.xml" --use_hw_mpy=F5 --rom_model -o "MakerSat0_r0.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/bin/cl430" -vmspx --data_model=restricted --use_hw_mpy=F5 --advice:power=all --advice:hw_config=all -g --define=__MSP430FR6989__ --diag_warning=225 --display_error_number --diag_wrap=off --silicon_errata=CPU21 --silicon_errata=CPU22 --silicon_errata=CPU40 --printf_support=minimal -z -m"Hub_Main.map" --heap_size=160 --stack_size=160 --cinit_hold_wdt=on -i"C:/ti/ccsv6/ccs_base/msp430/include" -i"C:/ti/ccsv6/ccs_base/msp430/lib/5xx_6xx_FRxx" -i"C:/ti/ccsv6/ccs_base/msp430/lib/FR59xx" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/include" --reread_libs --priority --display_error_number --warn_sections --diag_wrap=off --xml_link_info="Hub_Main_linkInfo.xml" --use_hw_mpy=F5 --rom_model -o "Hub_Main.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-MakerSat0_r0.hex: $(EXE_OUTPUTS)
+Hub_Main.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: MSP430 Hex Utility'
-	"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/bin/hex430" --memwidth=8 --romwidth=8 -o "MakerSat0_r0.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-msp430_15.12.1.LTS/bin/hex430" --memwidth=8 --romwidth=8 -o "Hub_Main.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "Circular_Buffer.d" "Initialize.d" "LED.d" "Packetizer.d" "SPI_Polling.d" "UART_Polling.d" "init.d" "main.d" "radio_chk.d" 
-	-$(RM) "Circular_Buffer.obj" "Initialize.obj" "LED.obj" "Packetizer.obj" "SPI_Polling.obj" "UART_Polling.obj" "init.obj" "main.obj" "radio_chk.obj" 
+	-$(RM) "main.d" 
+	-$(RM) "main.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

@@ -19,7 +19,7 @@
 
 // LEDS
 void Init_LED(void){
-	P1DIR |= LED_0 | LED_1 | LED_2;	                            // Set P1.0 to output direction
+	P1DIR |= LED_0 + LED_1 + LED_2;	                            // Set P1.0 to output direction
 	P1IN = 0x00;
 	P1OUT = 0x00;
 }
@@ -34,13 +34,12 @@ void Init_Timer(void){
 	
 }
 // PORTS
-void Init_Port(void){
+voidInit_Port(void){
 	// ISR
 	// Inputs
 	// Outputs
 	// Science Board selection
-	P4DIR |= SCI_1_SEL | SCI_2_SEL | SCI_3_SEL | SCI_4_SEL;
-	P4IN = 0x00;
+	P4DIR |= SCI_1_SEL + SCI_2_SEL + SCI_3_SEL + SCI_4_SEL;
 	P4OUT = 0x00;
 }
 
