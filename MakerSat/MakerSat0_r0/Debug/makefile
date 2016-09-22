@@ -11,6 +11,7 @@ GEN_CMDS__FLAG :=
 
 ORDERED_OBJS += \
 "./Circular_Buffer.obj" \
+"./Comm.obj" \
 "./Initialize.obj" \
 "./LED.obj" \
 "./Packetizer.obj" \
@@ -161,8 +162,8 @@ MakerSat0_r0.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "Circular_Buffer.d" "Initialize.d" "LED.d" "Packetizer.d" "SPI_Polling.d" "UART_Polling.d" "init.d" "main.d" "radio_chk.d" 
-	-$(RM) "Circular_Buffer.obj" "Initialize.obj" "LED.obj" "Packetizer.obj" "SPI_Polling.obj" "UART_Polling.obj" "init.obj" "main.obj" "radio_chk.obj" 
+	-$(RM) "Circular_Buffer.d" "Comm.d" "Initialize.d" "LED.d" "Packetizer.d" "SPI_Polling.d" "UART_Polling.d" "init.d" "main.d" "radio_chk.d" 
+	-$(RM) "Circular_Buffer.obj" "Comm.obj" "Initialize.obj" "LED.obj" "Packetizer.obj" "SPI_Polling.obj" "UART_Polling.obj" "init.obj" "main.obj" "radio_chk.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

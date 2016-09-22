@@ -10,6 +10,7 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./Circular_Buffer.obj" \
 "./main.obj" \
 "../lnk_msp430fr6989.cmd" \
 $(GEN_CMDS__FLAG) \
@@ -153,8 +154,8 @@ Hub_Main.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "main.d" 
-	-$(RM) "main.obj" 
+	-$(RM) "Circular_Buffer.d" "main.d" 
+	-$(RM) "Circular_Buffer.obj" "main.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

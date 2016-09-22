@@ -14,8 +14,12 @@
 #include "Circular_Buffer.h"
 #include "Comm.h"
 
+#define HandShake 0xBB
+
+bool break_flg = 0;
+uint32_t i = 0;
 uint8_t j = 0;
-uint8_t i = 0;
+uint8_t l = 0;
 uint16_t k = 0;
 uint8_t g_RXData;
 uint16_t source_ID = 1;
@@ -25,6 +29,7 @@ bool g_bufferEmpty;
 int IMU_done = 0;
 int sci_1_done = 0;
 int sci_2_done = 0;
+int HandShake_FAIL[3];
 
 int radio_busy = 0;
 
@@ -75,7 +80,7 @@ void IMU_Loop()
 }
 
 
-enum SCI_1_States { SCI_1_SMStart, SCI_1_PowerUp, SCI_1_Read, SCI_1_Send, SCI_1_Done} SCI_1_State;
+enum SCI_1_States { SCI_1_SMStart, SCI_1_PowerUp, SCI_1_HandShake, SCI_1_Read, SCI_1_PowerDown, SCI_1_Send, SCI_1_Done} SCI_1_State;
 
 void SCI_1_Loop()
 {
@@ -85,21 +90,70 @@ void SCI_1_Loop()
 			break;
 
 		case SCI_1_PowerUp:
-			// Radio data
-			while (j < 39)
-			{
-				write_UART (sci_1_powerUp[j]);		// Request power up from NSL
-				j++;
-			}
-			j = 0;
+			// Radio powerup science board information
+			powerUp(1);	// Power up science board 1
 			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
 			P4OUT |= BIT4;
+			SCI_1_State = SCI_1_HandShake;
+			break;
+			
+		case SCI_1_HandShake:
+/*
+			init();
+			start_timer();
+
+			while(!timeout && !GPIO){}
+
+			if(timeout) {
+				// what you do if timeout occurred
+			}
+			else {
+				//what you do if GPIO went high before timeout
+			}
+*/
+			// Send Science board handshake byte
+			break_flg = 0;
+			while (!(Sci_Ready()) && !break_flg) // Waits for GPIO to go high
+			{
+				i++;
+				if (i > 100000)	// Wait for 5 seconds to recieve a high otherwise restart science board 1
+				{
+					powerDown(1);
+					SCI_1_State = SCI_1_PowerUp;
+					break_flg = 1;
+				}
+			}
+			i = 0;
+			if (break_flg){break;}
+/*			read_SPI ();
+			if (g_RXData != HandShake)
+				{
+					HandShake_FAIL[k] = g_RXData;
+					SCI_1_State = SCI_1_PowerUp;
+					break;
+				}
+				k++;
+				if (k > 2)	// Try three times and move on to science board 2 if no handshake
+				{
+					SCI_1_State = SCI_1_Done;
+					while(l < 3)
+					{
+						write_UART(HandShake_FAIL[l]);
+						l++;
+					}
+					break;
+					k = 0;
+				}
+*/
+			g_RXData = 0x00;
+			break_flg = 0;
+			k = 0;
 			SCI_1_State = SCI_1_Read;
 			break;
+			
 		case SCI_1_Read:
-
 			while(g_RXData != 0xFF){
-					while (!(P4IN & BIT1)) {}							// Waits for GPIO to go high
+					while (!(Sci_Ready())) {}							// Waits for GPIO to go high
 					read_SPI ();
 					write_Buffer(g_RXData);
 					i++;
@@ -107,9 +161,16 @@ void SCI_1_Loop()
 			Packetizer(1, 0);
 			g_RXData = 0;	// Clear variable for next science board.
 			i = 0;
-			SCI_1_State = SCI_1_Send;
+			SCI_1_State = SCI_1_PowerDown;
 			break;
 
+		case SCI_1_PowerDown:
+			// Radio powerdown science board information
+			powerDown(1);	// Power up science board 1
+			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
+			SCI_1_State = SCI_1_Send;
+			break;
+			
 		case SCI_1_Send:
 			// Radio data
 			while (j < 39)
@@ -137,7 +198,7 @@ void SCI_1_Loop()
 	}
 }
 
-enum SCI_2_States { SCI_2_SMStart, SCI_2_PowerUp, SCI_2_Read, SCI_PowerDown, SCI_2_Send, SCI_2_Done} SCI_2_State;
+enum SCI_2_States { SCI_2_SMStart, SCI_2_PowerUp, SCI_2_HandShake, SCI_2_Read, SCI_2_PowerDown, SCI_2_Send, SCI_2_Done} SCI_2_State;
 
 void SCI_2_Loop()
 {
@@ -147,21 +208,71 @@ void SCI_2_Loop()
 			break;
 
 		case SCI_2_PowerUp:
-			// Radio data
-			while (j < 39)
-			{
-				write_UART (sci_2_powerUp[j]);		// Request power up from NSL
-				j++;
-			}
-			j = 0;
+			// Radio powerup science board information
+			powerUp(2);	// Power up science board 2
 			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
 			P4OUT |= BIT5;
+			SCI_2_State = SCI_2_HandShake;
+			break;
+			
+		case SCI_2_HandShake:
+			// Send Science board handshake byte
+/*
+			init();
+			start_timer();
+
+			while(!timeout && !GPIO){}
+
+			if(timeout) {
+				// what you do if timeout occurred
+			}
+			else {
+				//what you do if GPIO went high before timeout
+			}
+*/
+			// Send Science board handshake byte
+			break_flg = 0;
+			while (!(Sci_Ready()) && !break_flg) // Waits for GPIO to go high
+			{
+				i++;
+				if (i > 100000)	// Wait for 5 seconds to recieve a high otherwise restart science board 1
+				{
+					powerDown(2);
+					SCI_2_State = SCI_2_PowerUp;
+					break_flg = 1;
+				}
+			}
+			i = 0;
+			if (break_flg){break;}
+/*			read_SPI ();
+			if (g_RXData != HandShake)
+				{
+					HandShake_FAIL[k] = g_RXData;
+					SCI_2_State = SCI_2_PowerUp;
+					break;
+				}
+				k++;
+				if (k > 2)	// Try three times and move on to science board 2 if no handshake
+				{
+					SCI_2_State = SCI_2_Done;
+					while(l < 3)
+					{
+						write_UART(HandShake_FAIL[l]);
+						l++;
+					}
+					break;
+					k = 0;
+				}
+*/
+			g_RXData = 0x00;
+			break_flg = 0;
+			k = 0;
 			SCI_2_State = SCI_2_Read;
 			break;
+			
 		case SCI_2_Read:
-
 			while(g_RXData != 0xFF){
-					while (!(P4IN & BIT1)) {}							// Waits for GPIO to go high
+					while (!(Sci_Ready())) {}							// Waits for GPIO to go high
 					read_SPI ();
 					write_Buffer(g_RXData);
 					i++;
@@ -170,6 +281,13 @@ void SCI_2_Loop()
 			g_RXData = 0;	// Clear variable for next science board.
 			i = 0;
 			// Request power down from NSL
+			SCI_2_State = SCI_2_PowerDown;
+			break;
+			
+		case SCI_2_PowerDown:
+			// Radio powerdown science board information
+			powerDown(2);	// Power up science board 1
+			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
 			SCI_2_State = SCI_2_Send;
 			break;
 
