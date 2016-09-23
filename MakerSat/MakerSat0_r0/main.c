@@ -14,25 +14,21 @@
 #include "Circular_Buffer.h"
 #include "Comm.h"
 
-#define HandShake 0xBB
+#define hand_Shake_Rec 0xCC;
+#define hand_Shake_Send 0xBB;
 
 bool break_flg = 0;
-uint32_t i = 0;
-uint8_t j = 0;
-uint8_t l = 0;
-uint16_t k = 0;
 uint8_t g_RXData;
 uint16_t source_ID = 1;
-uint16_t g_bottom;
-uint16_t g_top;
-bool g_bufferEmpty;
-int IMU_done = 0;
-int sci_1_done = 0;
-int sci_2_done = 0;
-int HandShake_FAIL[3];
 
+bool IMU_done = 0;
+bool sci_1_done = 0;
+bool sci_2_done = 0;
 
-int radio_busy = 0;
+uint8_t pin_Setting = 0;				// selects the pins used for 6989
+uint8_t device_CS = 0;					// selects the SYNC/SS pin (5k POT)
+
+bool radio_busy = 0;
 
 
 void IMU_Loop();
@@ -73,14 +69,7 @@ void IMU_Loop()
 			break;
 
 		case IMU_Done:
-			for (k = 500; k > 0; k--)
-			{
-				write_Buffer(0x00);		// Clear circular buffer
-			}
-			j = 0;
-			g_bottom = 0;				// Set circular buffer back to zero
-			g_top = 0;					// Set circular buffer back to zero
-			g_bufferEmpty = false;		// Clear the g_bufferEmpty flag so that the next science board can store data
+			clear_CircularBuffer();
 			P9OUT = BIT5;
 			__delay_cycles(2000000);
 			P9OUT = 0x00;
@@ -100,90 +89,47 @@ void SCI_1_Loop()
 			break;
 
 		case SCI_1_PowerUp:
-			// Radio powerup science board information
 			powerUp(1);	// Power up science board 1
 			SCI_1_State = SCI_1_HandShake;
 			break;
 			
 		case SCI_1_HandShake:
-
-			// Send Science board handshake byte
-
 			Start_Timer();
 
 			while(!timeout && !Sci_Ready()){}
-			
+// Alive check
 			if(timeout){
 				powerDown(1);
 				SCI_1_State = SCI_1_PowerUp;
 				break_flg = 1;
 			}
 			if (break_flg){break_flg = 0;break;}
-			
-			/*			read_SPI ();
-			if (g_RXData != HandShake)
-				{
-					HandShake_FAIL[k] = g_RXData;
-					SCI_1_State = SCI_1_PowerUp;
-					break;
-				}
-				k++;
-				if (k > 2)	// Try three times and move on to science board 2 if no handshake
-				{
-					SCI_1_State = SCI_1_Done;
-					while(l < 3)
-					{
-						write_UART(HandShake_FAIL[l]);
-						l++;
-					}
-					break;
-					k = 0;
-				}
-*/
-			g_RXData = 0x00;
-			k = 0;
+// Handshake
+			hand_Shake();
+			if (get_state_1_PowerUp()){g_RXData = 0x00;SCI_1_State = SCI_1_PowerUp;break;}
+			else if(get_state_1_Done()){g_RXData = 0x00;SCI_1_State = SCI_1_Done;break;}
+
 			SCI_1_State = SCI_1_Read;
 			break;
 			
 		case SCI_1_Read:
-			while(g_RXData != 0xFF){
-					while (!(Sci_Ready())) {}							// Waits for GPIO to go high
-					read_SPI ();
-					write_Buffer(g_RXData);
-					i++;
-			}
+			SCI_Read();
 			Packetizer(1, 0);
-			g_RXData = 0;	// Clear variable for next science board.
-			i = 0;
 			SCI_1_State = SCI_1_PowerDown;
 			break;
 
 		case SCI_1_PowerDown:
-			// Radio powerdown science board information
 			powerDown(1);	// Power up science board 1
-
 			SCI_1_State = SCI_1_Send;
 			break;
 			
 		case SCI_1_Send:
-			// Radio data
-			while (j < 39)
-			{
-				write_UART (get_Data(j,1));
-				j++;
-			}
+			radio_Send();	// Send whats in circular buffer
 			SCI_1_State = SCI_1_Done;
 			break;
 
 		case SCI_1_Done:
-			for (k = 500; k > 0; k--)
-			{
-				write_Buffer(0x00);		// Clear circular buffer
-			}
-			j = 0;
-			g_bottom = 0;				// Set circular buffer back to zero
-			g_top = 0;					// Set circular buffer back to zero
-			g_bufferEmpty = false;		// Clear the g_bufferEmpty flag so that the next science board can store data
+			clear_CircularBuffer();
 			P9OUT = BIT6;
 			__delay_cycles(2000000);
 			P9OUT = 0x00;
@@ -202,89 +148,52 @@ void SCI_2_Loop()
 			break;
 
 		case SCI_2_PowerUp:
-			// Radio powerup science board information
 			powerUp(2);	// Power up science board 2
 			SCI_2_State = SCI_2_HandShake;
 			break;
 			
 		case SCI_2_HandShake:
-			// Send Science board handshake byte
 			Start_Timer();
 
 			while(!timeout && !Sci_Ready()){}
-
+// Alive check
 			if(timeout){
 				powerDown(2);
 				SCI_2_State = SCI_2_PowerUp;
 				break_flg = 1;
 			}
 			if (break_flg){break_flg = 0;break;}
-/*			read_SPI ();
-			if (g_RXData != HandShake)
-				{
-					HandShake_FAIL[k] = g_RXData;
-					SCI_2_State = SCI_2_PowerUp;
-					break;
-				}
-				k++;
-				if (k > 2)	// Try three times and move on to science board 2 if no handshake
-				{
-					SCI_2_State = SCI_2_Done;
-					while(l < 3)
-					{
-						write_UART(HandShake_FAIL[l]);
-						l++;
-					}
-					break;
-					k = 0;
-				}
-*/
-			g_RXData = 0x00;
+// Handshake
+			hand_Shake();
+			if (get_state_1_PowerUp()){g_RXData = 0x00;SCI_1_State = SCI_1_PowerUp;break;}
+			else if(get_state_1_Done()){g_RXData = 0x00;SCI_1_State = SCI_1_Done;break;}
+
 			break_flg = 0;
-			k = 0;
 			SCI_2_State = SCI_2_Read;
 			break;
 			
 		case SCI_2_Read:
 			while(g_RXData != 0xFF){
 					while (!(Sci_Ready())) {}							// Waits for GPIO to go high
-					read_SPI ();
+					read_SPI (0xAA);
 					write_Buffer(g_RXData);
-					i++;
 			}
 			Packetizer(1, 0);
-			g_RXData = 0;	// Clear variable for next science board.
-			i = 0;
-			// Request power down from NSL
 			SCI_2_State = SCI_2_PowerDown;
 			break;
 			
 		case SCI_2_PowerDown:
-			// Radio powerdown science board information
 			powerDown(2);	// Power up science board 1
-			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
 			SCI_2_State = SCI_2_Send;
 			break;
 
 		case SCI_2_Send:
-			// Radio data
-			while (j < 39)
-			{
-				write_UART (get_Data(j,1));
-				j++;
-			}
+			radio_Send();	// Send what is in circular buffer
 			SCI_2_State = SCI_2_Done;
 			break;
 
 		case SCI_2_Done:
-			for (k = 500; k > 0; k--)
-			{
-				write_Buffer(0x00);		// Clear circular buffer
-			}
-			j = 0;
-			g_bottom = 0;				// Set circular buffer back to zero
-			g_top = 0;					// Set circular buffer back to zero
-			g_bufferEmpty = false;		// Clear the g_bufferEmpty flag so that the next science board can store data
+			clear_CircularBuffer();
 			P9OUT = BIT7;
 			__delay_cycles(2000000);
 			P9OUT = 0x00;
@@ -293,27 +202,8 @@ void SCI_2_Loop()
 	}
 }
 
-
-
-// Interrupt for Timer 1
-// used to set global_Flg_2 which runs func_1 when the ISR is exited
-/*
-#pragma vector=TIMER1_A1_VECTOR
-__interrupt void Timer1_A1_ISR(void)
-
-{
-//	global_Flg_1 = 0x01;
-	__low_power_mode_off_on_exit();
-	TA1CTL &= ~CCIFG;
-	TA1CCTL1 &= ~CCIFG;
-
-}
-*/
-
-
 int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
-//	PM5CTL0 &= ~LOCKLPM5;						// Disable the GPIO power-on default high-impedance mode to actibate previoulsy configured port settings
 
 // Initializations
 	initialize_Ports();						// Init all non used ports
@@ -321,18 +211,10 @@ int main(void) {
 	__delay_cycles(500);
 	Init_LED();
 	Init_Timer();
-//	Init_Port();
-	Init_Comm();	// Should I wait on UART init???
+	Init_Comm();
 	Init_ADC();
 	Init_Var();
 
-
-
-
-	uint8_t pin_Setting = 0;				// selects the pins used for 6989
-	uint8_t device_CS = 0;					// selects the SYNC/SS pin (5k POT)
-
-//P2DIR &= ~BIT1;
 	init_SPI (pin_Setting);
 	init_UART (1, 0);
 /*

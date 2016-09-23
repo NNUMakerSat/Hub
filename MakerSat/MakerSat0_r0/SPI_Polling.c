@@ -179,11 +179,11 @@ void write_uint16_SPI (uint16_t tx_Data_16, uint8_t device_CS) {
 }
 
 ////////////////////// SPI READ POLLING //////////////////////////////////
-uint16_t read_SPI (void) {
+uint16_t read_SPI (uint8_t transmit_Byte) {
 
 //		P4OUT &= ~BIT1;									// Pulls SYNC low
 		while (!(UCB0IFG & UCTXIFG)) {};				// While TXing
-		UCB0TXBUF = 0xAA;								// Transmits read_byte
+		UCB0TXBUF = transmit_Byte;								// Transmits read_byte
 		while (UCB0STATW & UCBUSY) {};					// While not busy
 //		P4OUT |= BIT1;
 	while (!(UCB0IFG & UCRXIFG)) {};    				// While RX flag is high
