@@ -31,11 +31,21 @@ int sci_1_done = 0;
 int sci_2_done = 0;
 int HandShake_FAIL[3];
 
+
 int radio_busy = 0;
+
 
 void IMU_Loop();
 void SCI_1_Loop();
 void SCI_2_Loop();
+
+
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void Timer0_A0_ISR(void)
+{
+	timer++;
+	if (timer >= 4){timeout = 0x01;timer = 0;}	// wait 5 seconds
+}
 
 
 enum IMU_States { IMU_SMStart, IMU_Init, IMU_Read, IMU_Send, IMU_Done} IMU_State;
@@ -92,40 +102,25 @@ void SCI_1_Loop()
 		case SCI_1_PowerUp:
 			// Radio powerup science board information
 			powerUp(1);	// Power up science board 1
-			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
-			P4OUT |= BIT4;
 			SCI_1_State = SCI_1_HandShake;
 			break;
 			
 		case SCI_1_HandShake:
-/*
-			init();
-			start_timer();
 
-			while(!timeout && !GPIO){}
-
-			if(timeout) {
-				// what you do if timeout occurred
-			}
-			else {
-				//what you do if GPIO went high before timeout
-			}
-*/
 			// Send Science board handshake byte
-			break_flg = 0;
-			while (!(Sci_Ready()) && !break_flg) // Waits for GPIO to go high
-			{
-				i++;
-				if (i > 100000)	// Wait for 5 seconds to recieve a high otherwise restart science board 1
-				{
-					powerDown(1);
-					SCI_1_State = SCI_1_PowerUp;
-					break_flg = 1;
-				}
+
+			Start_Timer();
+
+			while(!timeout && !Sci_Ready()){}
+			
+			if(timeout){
+				powerDown(1);
+				SCI_1_State = SCI_1_PowerUp;
+				break_flg = 1;
 			}
-			i = 0;
-			if (break_flg){break;}
-/*			read_SPI ();
+			if (break_flg){break_flg = 0;break;}
+			
+			/*			read_SPI ();
 			if (g_RXData != HandShake)
 				{
 					HandShake_FAIL[k] = g_RXData;
@@ -146,7 +141,6 @@ void SCI_1_Loop()
 				}
 */
 			g_RXData = 0x00;
-			break_flg = 0;
 			k = 0;
 			SCI_1_State = SCI_1_Read;
 			break;
@@ -167,7 +161,7 @@ void SCI_1_Loop()
 		case SCI_1_PowerDown:
 			// Radio powerdown science board information
 			powerDown(1);	// Power up science board 1
-			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
+
 			SCI_1_State = SCI_1_Send;
 			break;
 			
@@ -210,40 +204,21 @@ void SCI_2_Loop()
 		case SCI_2_PowerUp:
 			// Radio powerup science board information
 			powerUp(2);	// Power up science board 2
-			P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);
-			P4OUT |= BIT5;
 			SCI_2_State = SCI_2_HandShake;
 			break;
 			
 		case SCI_2_HandShake:
 			// Send Science board handshake byte
-/*
-			init();
-			start_timer();
+			Start_Timer();
 
-			while(!timeout && !GPIO){}
+			while(!timeout && !Sci_Ready()){}
 
-			if(timeout) {
-				// what you do if timeout occurred
+			if(timeout){
+				powerDown(2);
+				SCI_2_State = SCI_2_PowerUp;
+				break_flg = 1;
 			}
-			else {
-				//what you do if GPIO went high before timeout
-			}
-*/
-			// Send Science board handshake byte
-			break_flg = 0;
-			while (!(Sci_Ready()) && !break_flg) // Waits for GPIO to go high
-			{
-				i++;
-				if (i > 100000)	// Wait for 5 seconds to recieve a high otherwise restart science board 1
-				{
-					powerDown(2);
-					SCI_2_State = SCI_2_PowerUp;
-					break_flg = 1;
-				}
-			}
-			i = 0;
-			if (break_flg){break;}
+			if (break_flg){break_flg = 0;break;}
 /*			read_SPI ();
 			if (g_RXData != HandShake)
 				{
@@ -338,9 +313,12 @@ __interrupt void Timer1_A1_ISR(void)
 
 int main(void) {
 	WDTCTL = WDTPW | WDTHOLD;					// Stop watchdog timer
-	PM5CTL0 &= ~LOCKLPM5;						// Disable the GPIO power-on default high-impedance mode to actibate previoulsy configured port settings
+//	PM5CTL0 &= ~LOCKLPM5;						// Disable the GPIO power-on default high-impedance mode to actibate previoulsy configured port settings
 
 // Initializations
+	initialize_Ports();						// Init all non used ports
+	initialize_Clocks();					// Sets up timers (takes care of FRAM issue)
+	__delay_cycles(500);
 	Init_LED();
 	Init_Timer();
 //	Init_Port();
@@ -349,8 +327,7 @@ int main(void) {
 	Init_Var();
 
 
-	initialize_Ports();						// Init all non used ports
-	initialize_Clocks();					// Sets up timers (takes care of FRAM issue)
+
 
 	uint8_t pin_Setting = 0;				// selects the pins used for 6989
 	uint8_t device_CS = 0;					// selects the SYNC/SS pin (5k POT)
@@ -369,7 +346,7 @@ int main(void) {
 */
 	SCI_1_State = SCI_1_SMStart;
 	SCI_2_State = SCI_2_SMStart;
-	//	__enable_interrupt();
+	__enable_interrupt();
 	while(1) {
 		// wait for interrupt
 		if (!IMU_done)

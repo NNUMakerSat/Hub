@@ -26,15 +26,14 @@ void Init_LED(void){
 // TIMERS
 // Set up timer A0
 void Init_Timer(void){
-	// Timer
-		// Set up timer A
-	TA0CTL |= (TASSEL_1 | MC_1 | TACLR);// ACLK | /1 | up mode | clear | interrupt disabled | no flag pending
-	TA0CCTL0 |= OUTMOD_4;
-	TA0CCR0 = 0x0010; // 1ms
-	
+	TA0CCR0 = 0x0000;
+	TA0R = 0X0000;
+	TA0CCTL0 |= CCIE; // no capture | compare mode
+	TA0CTL |= (TASSEL_1 + MC_1 + TACLR); // ACLK | /1 | UP mode | clear
+
 }
 // PORTS
-voidInit_Port(void){
+void Init_Port(void){
 	// ISR
 	// Inputs
 	// Outputs
@@ -76,4 +75,6 @@ void Init_ADC(void){
 void Init_Var(void){
 	// Random Variables
 }
+
+
 

@@ -18,6 +18,10 @@ extern uint8_t sci_3_pUp[39];   // Science board 3 ON
 extern uint8_t sci_4_pUp[39];   // Science board 4 ON
 extern uint8_t sci_x_pDown[39]; // Science board X OFF
 
+void Start_Timer(void);
+bool timeout;
+uint8_t timer;
+
 
 
 #endif /* COMM_H_ */

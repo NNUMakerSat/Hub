@@ -9,8 +9,8 @@
 #include <stdbool.h>
 #include "Comm.h"
 
-bool debounce0 = 0;
-bool debounce1 = 0;
+bool debounce0 = false;
+bool debounce1 = false;
 
 
 uint8_t sci_1_pUp[39] = { 0x50, 0x50, 0x50, 0x0B,   // Science board 1 ON
@@ -71,6 +71,12 @@ uint8_t sci_x_pDown[39] = { 0x50, 0x50, 0x50, 0x0B,   // Science board X OFF
 
 
 void powerUp(uint8_t sci_x_board){		
+	P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7); // Turn off all boards on HUB
+	if (sci_x_board == 1){P4OUT |= BIT4;}
+	if (sci_x_board == 2){P4OUT |= BIT5;}
+	if (sci_x_board == 3){P4OUT |= BIT6;}
+	if (sci_x_board == 4){P4OUT |= BIT7;}
+	__delay_cycles(500); // Turn on Science board 1 on HUB
 	uint8_t j = 0;
 	while (j < 39)
 			{
@@ -91,17 +97,31 @@ void powerDown(uint8_t sci_x_board){
 				j++;
 			}
 			j = 0;
+	__delay_cycles(500);
+	P4OUT &= ~(BIT4 + BIT5 + BIT6 + BIT7);	// Turn off all boards on HUB
 }
 
 int Sci_Ready(void){
-	if (P4IN & BIT1){debounce0 = 1;}
+	if (P4IN & BIT1){debounce0 = true;}
 	__delay_cycles(50);
-	if (P4IN & BIT1){debounce1 = 1;}
+	if (P4IN & BIT1){debounce1 = true;}
 	if (debounce0 && debounce1){
-		debounce0 = 0;
-		debounce1 = 0;
+		debounce0 = false;
+		debounce1 = false;
 		return 1;
 	}
 	else return 0;
 	}
+	
+void Start_Timer(void){
+	TA0R = 0X0000;
+	TA0CCTL0 &= ~CCIFG; // Clears the interrupt flag
+	TA0CCR0 = 0xFFFF; 	// wait 1 second
+	timer = 0;
+	timeout = false; // Clears the flag in the main function
+}
+
+uint8_t getTimer(void) {
+	return timer;
+}
 
