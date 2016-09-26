@@ -127,3 +127,6 @@ Hub to Radio/Debug/makefile
 Hub_Functionality_Testing/Debug/makefile
 *.obj
 *.obj
+*.prefs
+6989LSM9DS0/Debug/makefile
+*.ccxml
