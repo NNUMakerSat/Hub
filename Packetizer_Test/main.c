@@ -1,0 +1,380 @@
+#include <msp430.h>
+#include <stdint.h>
+#include "Circular_Buffer.h"
+#include "Packetizer.h"
+
+// main.c
+int main(void) {
+	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+	PM5CTL0 &= ~LOCKLPM5;
+
+	uint16_t source_ID = 0x0000;
+	uint8_t rxByteCount = 0;
+
+	uint8_t IMU_array[40];
+	uint8_t RAD_array[40];
+	uint8_t POLY_array[200];
+
+	uint8_t i;
+	uint8_t ii;
+	uint8_t j;
+	uint16_t count;
+
+	init_Buffer();
+
+	uint8_t example_IMU[20] = {0x22, 0x33, 0x44, 0x55, 0x22, 0x33, 0x55, 0x22,					// source ID = 0
+			0x33, 0x44, 0x68, 0x22, 0x55, 0x26, 0x45, 0xCC, 0xFF, 0xEE, 0x00, 0x02};
+
+	uint8_t example_RAD[30] = {0x22, 0x00, 0x44, 0x55, 0x52, 0x33, 0x55, 0x10,					// source ID = 1
+			0x11, 0x91, 0x00, 0x44, 0x55, 0x69, 0x15, 0x22, 0x33, 0x44, 0x55,
+			0x22, 0x33, 0x55, 0x22, 0x11, 0x91, 0x01, 0x44, 0x55, 0xFF, 0x69};
+
+	uint8_t example_POLY[200];																	// source ID = 2
+
+	while (source_ID < 3) {
+		init_Buffer();
+		switch (source_ID) {
+		case 0:
+			for (j = 0; j < 20; ++j) {
+
+				write_Buffer(example_IMU[j]);
+				rxByteCount++;
+			}
+			//break;
+			goto Packetizer;
+
+		case 1:
+	// put dummy data in circular buffer
+			for (j = 0; j < 30; ++j) {
+				write_Buffer(example_RAD[j]);
+				rxByteCount++;
+			}
+			//break;
+				goto Packetizer;
+
+		case 2:
+			for (count = 0; count < 700; ++count) {
+				example_POLY[count] = count;
+				write_Buffer(example_POLY[count]);
+			}
+			//break;
+			goto Packetizer;
+
+Packetizer:		Packetizer(source_ID, 0);
+
+	// This code sticks the packetized data in UARTarray, which emulates the actual UART
+		switch (source_ID) {
+		case 0:
+			for (ii = 0; ii < 39; ii++) {
+				IMU_array[ii] = get_IMU_Data(ii);						// works
+			}
+			//break;
+			goto Inc;
+		case 1:
+			for (ii = 0; ii < 39; ii++) {
+				RAD_array[ii] = get_RAD_Data(ii);						// works
+			}
+			//break;
+						goto Inc;
+		case 2:
+			//for (ii = 0; ii < (39*27/25); ii++) {
+			for (ii = 0; ii < (200); ii++) {
+				POLY_array[ii] = get_POLY_Data(ii);						// works
+			}
+			//break;
+						goto Inc;
+		}
+Inc:		++source_ID;
+		}
+
+	}
+
+	while (1) {
+	}
+
+}
+
+
+
+
+
+
+/*
+#pragma PERSISTENT(example_POLY)
+	uint8_t example_POLY[150] =
+			{0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0x00, 0x70};
+
+// main.c
+int main(void) {
+	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+	PM5CTL0 &= ~LOCKLPM5;
+
+	uint16_t source_ID = 0x0001;
+	uint8_t rxByteCount = 0;
+
+	uint8_t UARTarray[40];
+
+	uint8_t i;
+	uint8_t ii;
+	uint8_t j;
+
+	uint8_t example_IMU[11] = {0x22, 0x33, 0x44, 0x55, 0x22, 0x33, 0x55, 0x22,
+			0x33, 0x44, 0x68};
+
+	uint8_t example_RAD[30] = {0x22, 0x00, 0x44, 0x55, 0x52, 0x33, 0x55, 0x10,
+			0x11, 0x91, 0x00, 0x44, 0x55, 0x69, 0x15, 0x22, 0x33, 0x44, 0x55,
+			0x22, 0x33, 0x55, 0x22, 0x11, 0x91, 0x01, 0x44, 0x55, 0xFF, 0x69};
+
+	// put dummy data in circular buffer
+	for (j = 0; j < 30; ++j) {
+		write_Buffer(example_RAD[j]);
+		rxByteCount++;
+	}
+
+	Packetizer(source_ID, rxByteCount);
+
+	// This code sticks the packetized data in UARTarray, which emulates the actual UART
+	switch (source_ID) {
+	case 0:
+		for (ii = 0; ii < 39; ii++) {
+			UARTarray[ii] = get_IMU_Data(ii);						// works
+		}
+		break;
+	case 1:
+		for (ii = 0; ii < 39; ii++) {
+			UARTarray[ii] = get_RAD_Data(ii);						// works
+		}
+		break;
+	case 2:
+		for (ii = 0; ii < (39*5); ii++) {
+			UARTarray[ii] = get_POLY_Data(ii);						// works
+		}
+		break;
+	}
+
+	while (1) {
+	}
+}
+*/
+/*
+
+
+ uint16_t source_ID = 0x0001;
+ uint8_t i = 0;
+ uint8_t j = 0;
+ uint8_t exp_Counter = 0; //4
+
+ uint8_t array[20];
+
+ uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0x00, 0x70};  //150 bytes expected? //memcpy.c??
+
+ //    uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0, 0x70, 0x22, 0x33, 0x24, 0x54, 0, 0x70, 0x55, 0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0, 0x70, 0x11, 0xFF, 0x34 0x24, 0x54, 0, 0x70};
+
+ uint8_t example_IMU[11] = {0x22, 0x33, 0x44, 0x55, 0x22, 0x33, 0x55, 0x22, 0x33, 0x44, 0x68};
+
+ uint8_t example_RAD[4] = {0x19, 0x73, 0x22, 0x85};
+
+ uint8_t *p_RAD;
+ uint8_t *p_IMU;        					// pointers for Science Board Arrays
+ uint8_t *p_POLY;
+
+
+ //////////////////////////////////////////////////////////////////////////
+ //					 init Hub/SPI section								//
+ //////////////////////////////////////////////////////////////////////////
+ //	init_Hub();
+ //	init_Buffer();
+ //	uint8_t source_ID (returned) EPS(Hub&RAD);
+
+ for (j = 0; j < 4; ++j) {
+ write_Buffer(example_RAD[j]);
+ ++exp_Counter;
+ }
+
+ /*    while (P4OUT |= BIT1) { 			// while SB is transmitting information
+ //   	write_Buffer(SPI_read());
+ ++exp_Counter;					// Counts times SPI read was used
+ } */
+
+/*   Packetizer(source_ID, exp_Counter);
+
+ for (i = 0; i < 20; ++i) {
+ switch (source_ID) {
+ case 0:							// IMU
+ //  		write_UART(*p_IMU);
+ // 		array[i] = *p_IMU++;
+ case 1:							// RAD
+ //  		write_UART(*p_RAD);
+ array[i] = *p_RAD++;		// works great
+
+
+
+
+ case 2:							// POLY
+ // 		write_UART(*p_POLY);
+ ++p_POLY;
+ }
+ }
+ /////////////////////////////////////////////////////////////////////////////// EXPERMENTATION CODE
+ Packetizer(source_ID, exp_Counter);
+
+ for (i = 0; i < 20; ++i) {
+ switch (source_ID) {
+ case 0:							// IMU
+ //  		write_UART(*p_IMU);
+ //  		array[i] = *p_IMU++;
+ ++j;
+ //		break;						// 32h D0h F0h 00h FFh 3Fh FFh 3Fh FFh 3Fh ...... (even on other board)
+ case 1:							// RAD
+ //		write_UART(*p_RAD);
+ array[i] = *p_RAD++;		// works with EXTREME caution
+ break;						// alternates FFh and 3Fh when
+
+
+
+
+ case 2:							// POLY
+ // 		write_UART(*p_POLY);
+ //		array[i] = *p_POLY++;
+ //
+ //	break;
+
+
+
+ }
+ }
+ //////////////////////////////////////////////////////////////////////////////////////
+ while (1) {}
+ }
+
+ */
+//////////////////////////////////////////////////////////////////////////
+//					 write to Radio section								//
+//////////////////////////////////////////////////////////////////////////
+/*
+ // uint8_t  var = 20;   // actual variable declaration
+ uint8_t  *ip;        // pointer variable declaration
+ uint8_t array[3] = {10, 20, 30};
+ uint8_t array2[6] = {0, 0, 0, 0, 0, 0};
+
+ ip = &array[0];  // store address of var in pointer variable
+
+ //   array[0] = &var;
+ // array[1] = ip;
+ //array[2] = *ip;
+
+ array2[0] = *ip;
+ array2[1] = ++ip;
+ array2[2] = *ip;
+ //   array2[3] = *++ip;
+ array2[4] = ++ip;
+ array2[5] = *ip;
+ */
+
+/* address stored in pointer variable */
+
+/* access the value using the pointer
+
+ while (1) {}
+ }
+
+ ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////    THIS WORKS     /////////////////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ /*
+ #include <msp430.h>
+ #include <stdint.h>
+ #include "Circular_Buffer.h"
+ #include "Packetizer.h"
+
+ // main.c
+ int main(void) {
+ WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+ PM5CTL0 &= ~LOCKLPM5;
+
+ uint16_t source_ID = 0x0001;
+ uint8_t i = 0;
+ uint8_t j = 0;
+ uint8_t exp_Counter = 0; //4
+
+ uint8_t array[10];
+
+ uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0x00, 0x70};  //150 bytes expected?
+
+ //    uint8_t example_POLY[30] = {0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0, 0x70, 0x22, 0x33, 0x24, 0x54, 0, 0x70, 0x55, 0x22, 0x33, 0x44, 0x55, 0x24, 0x54, 0, 0x70, 0x11, 0xFF, 0x34 0x24, 0x54, 0, 0x70};
+
+ uint8_t example_IMU[11] = {0x22, 0x33, 0x44, 0x55, 0x22, 0x33, 0x55, 0x22, 0x33, 0x44, 0x68};
+
+ uint8_t example_RAD[4] = {0x22, 0x33, 0x44, 0x55};
+
+ uint8_t *p_RAD;
+ uint8_t *p_IMU;        					// pointers for Science Board Arrays
+ uint8_t *p_POLY;
+
+
+ //////////////////////////////////////////////////////////////////////////
+ //					 init Hub/SPI section								//
+ //////////////////////////////////////////////////////////////////////////
+ //	init_Hub();
+ //	init_Buffer();
+ //	uint8_t source_ID (returned) EPS(Hub&RAD);
+
+ for (j = 0; j < 4; ++j) {
+ write_Buffer(example_RAD[j]);
+ ++exp_Counter;
+ }
+
+ /*    while (P4OUT |= BIT1) { 			// while SB is transmitting information
+ //   	write_Buffer(SPI_read());
+ ++exp_Counter;					// Counts times SPI read was used
+ } */
+/*
+ Packetizer(source_ID, exp_Counter);
+
+ for (i = 0; i < 10; ++i) {
+ switch (source_ID) {
+ case 0:							// IMU
+ //  		write_UART(*p_IMU);
+ // 		array[i] = *p_IMU++;
+ case 1:							// RAD
+ //  		write_UART(*p_RAD);
+ array[i] = *p_RAD++;		// works great
+
+
+
+
+ case 2:							// POLY
+ // 		write_UART(*p_POLY);
+ ++p_POLY;
+ }
+ }
+
+ //////////////////////////////////////////////////////////////////////////
+ //					 write to Radio section								//
+ //////////////////////////////////////////////////////////////////////////
+ /*
+ // uint8_t  var = 20;   // actual variable declaration
+ uint8_t  *ip;        // pointer variable declaration
+ uint8_t array[3] = {10, 20, 30};
+ uint8_t array2[6] = {0, 0, 0, 0, 0, 0};
+
+ ip = &array[0];  // store address of var in pointer variable
+
+ //   array[0] = &var;
+ // array[1] = ip;
+ //array[2] = *ip;
+
+ array2[0] = *ip;
+ array2[1] = ++ip;
+ array2[2] = *ip;
+ //   array2[3] = *++ip;
+ array2[4] = ++ip;
+ array2[5] = *ip;
+ */
+
+/* address stored in pointer variable */
+
+/* access the value using the pointer */
+
+//	return 0;
+//}
